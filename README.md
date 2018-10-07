@@ -33,14 +33,13 @@ provider "hcloud" {
 }
 
 module "provider" {
-  source = "git::https://github.com/suquant/tf_hcloud.git?ref=v1.0.0"
+  source = "git::https://github.com/suquant/tf_hcloud.git?ref=v1.1.0"
 
   count = "${var.hosts}"
-  token = "${var.token}"
 }
 
 module "docker" {
-  source = "git::https://github.com/suquant/tf_docker.git?ref=v1.0.0"
+  source = "git::https://github.com/suquant/tf_docker.git?ref=v1.0.1"
 
   count       = "${var.hosts}"
   connections = "${module.provider.public_ips}"
