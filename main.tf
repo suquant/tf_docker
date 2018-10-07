@@ -1,3 +1,19 @@
+variable "count" {}
+
+variable "connections" {
+  type = "list"
+}
+
+variable "docker_version" {
+  default = "17.03"
+}
+
+variable "docker_opts" {
+  type = "list"
+  default = []
+}
+
+
 resource "null_resource" "docker" {
   count = "${var.count}"
 
@@ -25,22 +41,19 @@ resource "null_resource" "docker" {
   }
 
   provisioner "remote-exec" {
-    inline = <<EOF
-${data.template_file.install.rendered}
-EOF
+    inline = [
+      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -",
+      "echo \"deb [arch=amd64] https://download.docker.com/linux/$$(. /etc/os-release; echo \"$ID\") $$(lsb_release -cs) stable\" > /etc/apt/sources.list.d/docker-ce.list",
+      "apt update",
+      "DEBIAN_FRONTEND=noninteractive apt install -yq docker-ce",
+      "systemctl daemon-reload",
+      "systemctl restart docker.service"
+    ]
   }
 }
 
 data "template_file" "apt_preference" {
   template = "${file("${path.module}/templates/apt-preference.conf")}"
-
-  vars {
-    version = "${var.docker_version}"
-  }
-}
-
-data "template_file" "install" {
-  template = "${file("${path.module}/templates/install.sh")}"
 
   vars {
     version = "${var.docker_version}"
@@ -53,4 +66,22 @@ data "template_file" "docker_opts" {
   vars {
     opts = "${join(" ", var.docker_opts)}"
   }
+}
+
+output "public_ips" {
+  value = ["${var.connections}"]
+
+  depends_on = ["null_resource.docker"]
+}
+
+output "iptables_filter_chains" {
+  value = ["DOCKER", "DOCKER-ISOLATION"]
+
+  depends_on = ["null_resource.docker"]
+}
+
+output "iptables_nat_chains" {
+  value = ["DOCKER", "DOCKER-ISOLATION"]
+
+  depends_on = ["null_resource.docker"]
 }

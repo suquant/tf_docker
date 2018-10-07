@@ -1,10 +1,21 @@
 variable "token" {}
 variable "hosts" {
-  default = 2
+  default = 1
 }
 variable "docker_opts" {
   type = "list"
-  default = ["--iptables=false", "--ip-masq=false"]
+  default = [
+    "--iptables=false",
+    "--ip-masq=false",
+    "--storage-driver=overlay2",
+    "--live-restore",
+    "--log-level=warn",
+    "--bip=169.254.123.1/24",
+    "--log-driver=json-file",
+    "--log-opt=max-size=10m",
+    "--log-opt=max-file=5",
+    "--insecure-registry 10.0.0.0/8"
+  ]
 }
 
 provider "hcloud" {
@@ -12,10 +23,9 @@ provider "hcloud" {
 }
 
 module "provider" {
-  source = "git::https://github.com/suquant/tf_hcloud.git?ref=v1.0.0"
+  source = "git::https://github.com/suquant/tf_hcloud.git?ref=v1.1.0"
 
   count = "${var.hosts}"
-  token = "${var.token}"
 }
 
 module "docker" {
