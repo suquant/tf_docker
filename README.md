@@ -12,8 +12,6 @@
 ### Output variables
 
 * public_ips - public ips
-* iptables_filter_chains - iptables filter chains created by docker
-* iptables_nat_chains - iptables nat chains created by docker
 
 
 ## Example
@@ -39,7 +37,7 @@ module "provider" {
 }
 
 module "docker" {
-  source = "git::https://github.com/suquant/tf_docker.git?ref=v1.0.1"
+  source = "git::https://github.com/suquant/tf_docker.git?ref=v1.1.0"
 
   count       = "${var.hosts}"
   connections = "${module.provider.public_ips}"
